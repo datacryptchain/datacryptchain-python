@@ -1,0 +1,8 @@
+*~
+.DS_STORE
+[#]*[#]
+*.pyc
+*/local_settings.py
+*/geckodriver.log
+geckodriver.log
+.Rhistory
