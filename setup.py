@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='datacryptchain',
-    version='0.0.0.9008',
+    version='0.0.0.9010',
     packages=['datacryptchain',],
     license='Creative Commons Attribution-Noncommercial-Share Alike license',
     long_description=open('README.txt').read(),
