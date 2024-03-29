@@ -168,10 +168,9 @@ def main():
 
         with open(csv_filename, 'w', newline='') as csvoutfile:
             filewriter = csv.writer(csvoutfile, delimiter=",", quotechar='"')
+            #import pdb; pdb.set_trace()
             for row in previous_csv.splitlines():
-
                 row_values=[]
-
                 for value in row.split(','):
                     try:
                         decode_text = decrypt_text(prf, value)
@@ -179,7 +178,7 @@ def main():
                     except:
                         pass
                     row_values.append(value)
-                    filewriter.writerow(row_values)
+                filewriter.writerow(row_values)
 
 
     if command == UPDATE: #update the ledger
