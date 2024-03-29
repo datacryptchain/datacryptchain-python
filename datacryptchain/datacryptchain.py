@@ -18,6 +18,7 @@ def decrypt_text(secretkeyfilename, hashed_text):
     decode_text = decode_text.decode()
     return decode_text        
 
+
 def encrypt_text(publickeyfilename, text):
     text_bytes = bytes(text, "ascii")
     pcf = publickeyfilename
@@ -28,7 +29,8 @@ def encrypt_text(publickeyfilename, text):
     hashed_text = hashed_text.decode()
     return hashed_text
 
-def validate_ledger(ledger_filename):
+
+def validate_ledger(ledger_filename, verbose=False):
     previous_tree = et.parse(ledger_filename)
     root = previous_tree.getroot()
     blocks = root.findall("block")
@@ -41,10 +43,32 @@ def validate_ledger(ledger_filename):
         datetime = block.find("datetime").text
         hashable_string = f"{previous_hash} | {csv_content} | {comment} | {datetime}"
         new_hash = hashlib.sha256(hashable_string.encode()).hexdigest()
-        print(f"block hash: {block_hash} | calculated hash: {new_hash}")
+        if verbose == True:
+            print(f"block hash: {block_hash} | calculated hash: {new_hash}")
         if block_hash != new_hash:
             errors = errors + 1
         previous_hash = block_hash #set this as previous hash for the next round
+    return errors
+
+
+def extract_csv(ledger_filename, csv_filename):
+    previous_tree = et.parse(ledger_filename)
+    root = previous_tree.getroot()
+    previous_csv = root.findall(".//csv")[-1].text
+    
+    with open(csv_filename, 'w', newline='') as csvoutfile:
+        filewriter = csv.writer(csvoutfile, delimiter=",", quotechar='"')
+        for row in previous_csv.splitlines():
+            row_values=[]
+            for value in row.split(','):
+                try:
+                    decode_text = decrypt_text(prf, value)
+                    value = decode_text
+                except:
+                    pass
+                row_values.append(value)
+            filewriter.writerow(row_values)
+    errors = 0
     return errors
 
 
@@ -62,7 +86,7 @@ def main():
     VALIDATE = "validate"
     PACK = "pack"
     UNPACK = "unpack"
-    VERSION = "0.0.0.9010"
+    VERSION = "0.0.0.9011"
 
     parser = argparse.ArgumentParser(description='DataCryptChain')
 
@@ -105,7 +129,7 @@ def main():
     command = args.command
     target = args.target
 
-
+    
     if command == PACK:
         # TODO ensure that csv is up to date for ledger
         # TODO ensure that ledger is valid
@@ -148,40 +172,31 @@ def main():
         with open(ledger_filename, "wb") as f:
             f.write(data)
 
-        # TODO: validate the ledger
-        # TODO: unpack the csv
-
-
-    if command == VALIDATE:
+        #validate the ledger
         ledger_filename = target +".dcl"
         errors = validate_ledger(ledger_filename)
+        print(f"The ledger has been validated with {errors} errors")
+        
+        #extract the csv
+        csv_filename = target + ".csv"
+        errors = extract_csv(ledger_filename, csv_filename)
+        print(f"The csv has been extracted to the current directory with {errors} errors")
 
+
+    if command == VALIDATE: #validate the ledger
+        ledger_filename = target +".dcl"
+        errors = validate_ledger(ledger_filename)
         print(f"The ledger has been validated with {errors} errors")
 
 
     if command == EXTRACT: #extract the csv
         ledger_filename = target + ".dcl"
         csv_filename = target + ".csv"
-        previous_tree = et.parse(ledger_filename)
-        root = previous_tree.getroot()
-        previous_csv = root.findall(".//csv")[-1].text
-
-        with open(csv_filename, 'w', newline='') as csvoutfile:
-            filewriter = csv.writer(csvoutfile, delimiter=",", quotechar='"')
-            #import pdb; pdb.set_trace()
-            for row in previous_csv.splitlines():
-                row_values=[]
-                for value in row.split(','):
-                    try:
-                        decode_text = decrypt_text(prf, value)
-                        value = decode_text
-                    except:
-                        pass
-                    row_values.append(value)
-                filewriter.writerow(row_values)
-
-
-    if command == UPDATE: #update the ledger
+        errors = extract_csv(ledger_filename, csv_filename)
+        print(f"The csv has been extracted to the current directory with {errors} errors")
+        
+       
+    if command == UPDATE: #update the ledger to include the current .csv file
         filename = target + ".dcl"
         ledger_filename = target + ".dcl"
         csv_filename = target + ".csv"
