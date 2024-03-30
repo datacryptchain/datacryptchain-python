@@ -13,8 +13,8 @@ Installation from Source
 2. Download the repository: http://git.stat59.com/stat59/datacryptchain.git 
 3. pip install -r requirements.txt
 4. Switch to the directory including datacryptchain.py
-5. Build exectuable with pyinstaller datacryptchain.py --onefile
-6. The exectuable will be built in the ~/dist directory
+5. Build executable with pyinstaller datacryptchain.py --onefile
+6. The executable will be built in the ~/dist directory
 7. Move the executable to /usr/local/bin/
 
 
@@ -43,7 +43,7 @@ Validate the Ledger
  This will validate the DataCryptChain and return the number of errors
 
 Pack the Ledger
- >> datacryptchain pack poodles [--publickeyfile public.dcp]
+ >> datacryptchain pack poodles [--publickeyfile public.dcp] 
  This will pack the ledger into an encrypted file for the public key.
  The ledger always contains the .csv file (do not transmit the .csv separately)
 
