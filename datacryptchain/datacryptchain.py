@@ -9,6 +9,7 @@ import hashlib
 import rsa
 import csv
 
+
 def decrypt_text(secretkeyfilename, hashed_text):
     decode_hashed_text = hashed_text
     decode_hashed_text_bytes = base64.b64decode(decode_hashed_text)
@@ -115,7 +116,6 @@ def initialize_project(project_name):
     errors = 0
     return errors
     
-
 
 def main():
 
@@ -285,8 +285,6 @@ def main():
         errors = make_keys()
     
         
-
-
     if command == ENCRYPT_TEXT:
         text = args.text
         pcf = args.publickeyfilename
