@@ -30,6 +30,16 @@ def encrypt_text(publickeyfilename, text):
     return hashed_text
 
 
+def make_keys():
+    (publicKey, privateKey) = rsa.newkeys(1024)
+    with open('public.dcp', 'wb') as p:
+        p.write(publicKey.save_pkcs1('PEM'))
+    with open('secret.dcs', 'wb') as p:
+        p.write(privateKey.save_pkcs1('PEM'))
+    errors = 0
+    return errors
+
+
 def validate_ledger(ledger_filename, verbose=False):
     previous_tree = et.parse(ledger_filename)
     root = previous_tree.getroot()
@@ -270,15 +280,11 @@ def main():
         print(f"The project {target} was initialized with {errors} errors")
         
        
-
-
     if command == MAKEKEY:
         print("Public key and secret keys will be written to the current directory")
-        (publicKey, privateKey) = rsa.newkeys(1024)
-        with open('public.dcp', 'wb') as p:
-            p.write(publicKey.save_pkcs1('PEM'))
-            with open('secret.dcs', 'wb') as p:
-                p.write(privateKey.save_pkcs1('PEM'))
+        errors = make_keys()
+    
+        
 
 
     if command == ENCRYPT_TEXT:
