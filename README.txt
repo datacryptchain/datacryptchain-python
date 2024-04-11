@@ -1,13 +1,14 @@
 DataCryptChain
 
 
-Installation from binary
+INSTALLATION FROM BINARY
+
 1. Download the binary from https://www.datacryptchain.com/downloads/
 2. Move the binary to /usr/local/bin or wherever you keep your executables
 
 
 
-Installation from Source
+INSTALLATION FROM SOURCE
 
 1. Create a new virtual environment
 2. Download the repository: http://git.stat59.com/stat59/datacryptchain.git 
@@ -19,7 +20,7 @@ Installation from Source
 
 
 
-Using DataCryptChain
+USING DataCryptChain
 
 Create New DataCryptChain Keys
  DataCryptChain keys are needed to encrypt and decrypt the chain      
@@ -54,9 +55,10 @@ Unpack the Ledger
 Extract the csv
  >> datacryptchain extract poodles
  Extracts the .csv file from the ledger
- 
- 
- 
+
+
+TESTING
+ >>  python -m unittest discover -s tests -v #run from ~/datacryptchain/ 
 
 
 

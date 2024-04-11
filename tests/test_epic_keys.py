@@ -8,7 +8,7 @@ class TestKeyCreation(fakeunittest.TestCase):
     def setUp(self):
         self.setUpPyfakefs()
         
-    def test_user_can_initialize_project(self):
+    def test_user_can_create_keys(self):
         errors = dcc.make_keys()
         self.assertEqual(errors, 0)
         self.assertTrue(os.path.exists("public.dcp"))

@@ -1,8 +1,8 @@
 import argparse
 import base64
-from Crypto.Cipher import AES, PKCS1_OAEP
-from Crypto.PublicKey import RSA as CRSA
-from Crypto.Random import get_random_bytes
+from Cryptodome.Cipher import AES, PKCS1_OAEP
+from Cryptodome.PublicKey import RSA as CRSA
+from Cryptodome.Random import get_random_bytes
 from datetime import datetime, timezone
 import xml.etree.ElementTree as et
 import hashlib
@@ -115,7 +115,39 @@ def initialize_project(project_name):
 
     errors = 0
     return errors
+
+
+def unpack_chain(project, skf):
+    csv_filename = project + ".csv"
+    dcc_filename = project + ".dcc"
+    ledger_filename = project + ".dcl"
+      
+    private_key = CRSA.import_key(open(skf).read())
+
+    with open(dcc_filename, "rb") as f:
+        enc_session_key = f.read(private_key.size_in_bytes())
+        nonce = f.read(16)
+        tag = f.read(16)
+        ciphertext = f.read()
+        cipher_rsa = PKCS1_OAEP.new(private_key)
+        session_key = cipher_rsa.decrypt(enc_session_key)
+        cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
+        data = cipher_aes.decrypt_and_verify(ciphertext, tag)
+        
+    with open(ledger_filename, "wb") as f:
+        f.write(data)
+
+    #validate the ledger
+    errors = validate_ledger(ledger_filename)
+    print(f"The ledger has been validated with {errors} errors")
+        
+    #extract the csv
     
+    errors = extract_csv(ledger_filename, csv_filename)
+    print(f"The csv has been extracted to the current directory with {errors} errors")
+
+    errors = 0
+    return errors
 
 def main():
 
@@ -200,34 +232,11 @@ def main():
 
 
     if command == UNPACK:
-        ledger_filename = target +".dcl"
-        dcc_filename = target + ".dcc"
+        project = target
         skf = args.secretkeyfilename
-        private_key = CRSA.import_key(open(skf).read())
+        unpack_chain(project, skf)
 
-        with open(dcc_filename, "rb") as f:
-            enc_session_key = f.read(private_key.size_in_bytes())
-            nonce = f.read(16)
-            tag = f.read(16)
-            ciphertext = f.read()
-            cipher_rsa = PKCS1_OAEP.new(private_key)
-            session_key = cipher_rsa.decrypt(enc_session_key)
-            cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
-            data = cipher_aes.decrypt_and_verify(ciphertext, tag)
-        with open(ledger_filename, "wb") as f:
-            f.write(data)
-
-        #validate the ledger
-        ledger_filename = target +".dcl"
-        errors = validate_ledger(ledger_filename)
-        print(f"The ledger has been validated with {errors} errors")
         
-        #extract the csv
-        csv_filename = target + ".csv"
-        errors = extract_csv(ledger_filename, csv_filename)
-        print(f"The csv has been extracted to the current directory with {errors} errors")
-
-
     if command == VALIDATE: #validate the ledger
         ledger_filename = target +".dcl"
         errors = validate_ledger(ledger_filename)
