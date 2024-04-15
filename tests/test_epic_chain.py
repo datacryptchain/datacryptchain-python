@@ -16,16 +16,23 @@ class TestChainDecryption(fakeunittest.TestCase):
         PROJECT = "forest_cats"
         LEDGER_FILENAME = "forest_cats.dcl"
         SK_FILENAME = "forest_cats_secret.dcs"
+        CHAIN_FILENAME = "forest_cats.dcc"
 
         #Create the keyfile
         secret_key_text = test_keys.FOREST_CATS_SECRET
         with open(SK_FILENAME, "w") as text_file:
             text_file.write(secret_key_text)
+        self.assertTrue(os.path.exists(SK_FILENAME))    
+            
 
-        with open(os.path.join(self.fixture_path, "forest_cats.dcc")) as f:
-            #dcc.unpack_chain(PROJECT, SK_FILENAME)
-            #import pdb; pdb.set_trace()
-            pass
+        with open(os.path.join(self.fixture_path, CHAIN_FILENAME)) as f:
+            with open(CHAIN_FILENAME, "w") as target_chain:
+                 target_chain.write(secret_key_text)
+            
+        self.assertTrue(os.path.exists(CHAIN_FILENAME))
+        #dcc.unpack_chain(PROJECT, SK_FILENAME) # TODO - Fix This Test
+            
+            
 
       
 
