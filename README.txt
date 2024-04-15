@@ -8,7 +8,7 @@ On Linux or MacOS any terminal will work
 
 Installation from Binary
 Binaries are available for Linux, Mac OS, or Windows.
-    Download the binary from https://www.datacryptchain.org/about/download/
+    Download the binary from https://www.datacryptchain.org/about/download
     Unpack the .zip file into a temporary directory
 
 Installation from Binary - MacOS
