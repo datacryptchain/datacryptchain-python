@@ -163,7 +163,7 @@ def main():
     VALIDATE = "validate"
     PACK = "pack"
     UNPACK = "unpack"
-    VERSION = "0.0.0.9011"
+    VERSION = "0.0.0.1" #Note Change this in setup.py as well
 
     parser = argparse.ArgumentParser(description='DataCryptChain')
 

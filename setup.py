@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='datacryptchain',
-    version='0.0.0.9011',
+    version='0.0.1', # Note change this is the datacryptchain.py executable as well
     packages=['datacryptchain',],
     license='Creative Commons Attribution-Noncommercial-Share Alike license',
     long_description=open('README.txt').read(),
@@ -16,7 +16,6 @@ setup(
         "charset-normalizer>=2.0.12",
         "idna>=3.6",
         "Naked>=0.1.32",
-        "pkg-resources>=0.0.0",
         "pyasn1>=0.5.1",
         "pycryptodome>=3.20.0",
         "PyYAML>=6.0.1",
