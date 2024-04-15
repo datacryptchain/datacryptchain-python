@@ -75,7 +75,7 @@ Pack the Ledger
   Only packed DataCryptChain, labelled as .dcc should be transmitted or shared.
   You will need the public DataCryptChain key for the recipient saved as a .dcp file.
   Keys can be requested from the recipient and be safely transmitted by email.
-  Alternatively, check the public key directory on www.datcryptchain.org to see if the recipient has a registered key.
+  Alternatively, check the public key directory on www.datacryptchain.org to see if the recipient has a registered key.
   >> datacryptchain pack poodles --publickeyfile /path/to/recepient_public_key.dcp
   The ledger always contains the .csv file (do not transmit the .csv separately).
 
