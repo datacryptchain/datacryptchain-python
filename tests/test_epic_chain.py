@@ -5,35 +5,39 @@ from pyfakefs import fake_filesystem_unittest as fakeunittest
 from datacryptchain import datacryptchain as dcc
 from fixtures import test_keys
 
-class TestChainDecryption(fakeunittest.TestCase):
-    fixture_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
+class TestChainDecryption(unittest.TestCase):    
+    
     def setUp(self):
-        self.setUpPyfakefs()
-        self.fs.add_real_directory(self.fixture_path)
-
+        pass
+        
     def test_chain_decryptable_with_key(self):
         PROJECT = "forest_cats"
-        LEDGER_FILENAME = "forest_cats.dcl"
-        SK_FILENAME = "forest_cats_secret.dcs"
         CHAIN_FILENAME = "forest_cats.dcc"
+        SK_FILENAME = "fc_secret.dcs"
+        fixture_path = os.path.join(os.path.dirname(__file__), "fixtures")
+        os.chdir(fixture_path)
+        
+        # Test that file can be unpacked
+        dcc.unpack_chain(PROJECT, SK_FILENAME) # TODO - Fix This Test
+        self.assertTrue(os.path.exists("forest_cats.dcl"))
+        self.assertTrue(os.path.exists("forest_cats.csv"))
 
-        #Create the keyfile
-        secret_key_text = test_keys.FOREST_CATS_SECRET
-        with open(SK_FILENAME, "w") as text_file:
-            text_file.write(secret_key_text)
-        self.assertTrue(os.path.exists(SK_FILENAME))    
+        # Ensure that the unpacked file is valid
+        errors = dcc.validate_ledger("forest_cats.dcl")
+        self.assertEqual(errors, 0)
+
+        # Ensure that the cats name appears in the csv
+        with open("forest_cats.csv", "r") as csv_file:
+                  csv = csv_file.read()
+        self.assertTrue("skogkatt" in csv)
+            
+        #Clean up
+        os.remove("forest_cats.csv")
+        os.remove("forest_cats.dcl")    
             
 
-        with open(os.path.join(self.fixture_path, CHAIN_FILENAME)) as f:
-            with open(CHAIN_FILENAME, "w") as target_chain:
-                 target_chain.write(secret_key_text)
-            
-        self.assertTrue(os.path.exists(CHAIN_FILENAME))
-        #dcc.unpack_chain(PROJECT, SK_FILENAME) # TODO - Fix This Test
-            
-            
-
+        
       
 
 

@@ -41,6 +41,66 @@ def make_keys():
     return errors
 
 
+def update_ledger(ledger_filename, csv_filename):
+    from datetime import datetime, timezone
+    previous_tree = et.parse(ledger_filename)
+    root = previous_tree.getroot()
+    datetime_now = datetime.now(timezone.utc).ctime() + " UTC"
+    previous_hash = root.findall(".//hash")[-1].text
+    with open(csv_filename, 'r') as file:
+        csv_content = file.read()
+
+    comment = "DataCryptChain Updated"
+    datetime = datetime.now(timezone.utc).ctime() + " UTC"
+    hashable_string = f"{previous_hash} | {csv_content} | {comment} | {datetime}"
+    new_hash = hashlib.sha256(hashable_string.encode()).hexdigest()
+
+    m0 = et.Element("block")
+    root.append(m0)
+    m1 = et.SubElement(m0, "csv")
+    m1.text = csv_content
+    m2 = et.SubElement(m0, "comment")
+    m2.text = comment
+    m3 = et.SubElement(m0, "datetime")
+    m3.text = datetime
+    m4 = et.SubElement(m0, "hash")
+    m4.text = new_hash    
+
+    tree = et.ElementTree(root)
+
+    with open (ledger_filename, "wb") as files :
+        tree.write(files)
+
+    errors = 0
+    return errors
+
+
+def pack_ledger(project, pkf):
+    ledger_filename = project + ".dcl"
+    dcc_filename = project + ".dcc"
+
+    with open(ledger_filename, 'r') as file:
+        ledger_text = file.read()
+
+    with open(pkf, 'r') as file:
+        recipient_key = CRSA.import_key(file.read())
+    session_key = get_random_bytes(32)
+    cipher_rsa = PKCS1_OAEP.new(recipient_key)
+    enc_session_key = cipher_rsa.encrypt(session_key)
+
+    cipher_aes = AES.new(session_key, AES.MODE_EAX)
+    ciphertext, tag = cipher_aes.encrypt_and_digest(ledger_text.encode())
+
+    with open(dcc_filename, "wb") as f:
+        f.write(enc_session_key)
+        f.write(cipher_aes.nonce)
+        f.write(tag)
+        f.write(ciphertext)
+
+    errors = 0
+    return errors
+
+
 def validate_ledger(ledger_filename, verbose=False):
     previous_tree = et.parse(ledger_filename)
     root = previous_tree.getroot()
@@ -122,7 +182,8 @@ def unpack_chain(project, skf):
     dcc_filename = project + ".dcc"
     ledger_filename = project + ".dcl"
       
-    private_key = CRSA.import_key(open(skf).read())
+    with open(skf, 'r') as file:
+        private_key = CRSA.import_key(file.read())
 
     with open(dcc_filename, "rb") as f:
         enc_session_key = f.read(private_key.size_in_bytes())
@@ -137,15 +198,8 @@ def unpack_chain(project, skf):
     with open(ledger_filename, "wb") as f:
         f.write(data)
 
-    #validate the ledger
     errors = validate_ledger(ledger_filename)
-    print(f"The ledger has been validated with {errors} errors")
-        
-    #extract the csv
-    
     errors = extract_csv(ledger_filename, csv_filename)
-    print(f"The csv has been extracted to the current directory with {errors} errors")
-
     errors = 0
     return errors
 
@@ -208,33 +262,17 @@ def main():
 
     
     if command == PACK:
-        # TODO ensure that csv is up to date for ledger
-        # TODO ensure that ledger is valid
-        ledger_filename = target +".dcl"
-        dcc_filename = target + ".dcc"
+        project = target
         pkf = args.publickeyfilename
-        with open(ledger_filename, 'r') as file:
-            ledger_text = file.read()
-
-        recipient_key = CRSA.import_key(open(pkf).read())
-        session_key = get_random_bytes(32)
-        cipher_rsa = PKCS1_OAEP.new(recipient_key)
-        enc_session_key = cipher_rsa.encrypt(session_key)
-
-        cipher_aes = AES.new(session_key, AES.MODE_EAX)
-        ciphertext, tag = cipher_aes.encrypt_and_digest(ledger_text.encode())
-
-        with open(dcc_filename, "wb") as f:
-            f.write(enc_session_key)
-            f.write(cipher_aes.nonce)
-            f.write(tag)
-            f.write(ciphertext)
-
+        errors = pack_ledger(project, pkf)
+        print(f"The Ledger has been sucessfully packed with {errors} errors.")
 
     if command == UNPACK:
         project = target
         skf = args.secretkeyfilename
-        unpack_chain(project, skf)
+        errors = unpack_chain(project, skf)
+        print(f"The DataCryptChain has been validated with {errors} errors")
+
 
         
     if command == VALIDATE: #validate the ledger
@@ -251,37 +289,13 @@ def main():
         
        
     if command == UPDATE: #update the ledger to include the current .csv file
-        filename = target + ".dcl"
         ledger_filename = target + ".dcl"
         csv_filename = target + ".csv"
-        previous_tree = et.parse(ledger_filename)
-        root = previous_tree.getroot()
+        errors = update_ledger(ledger_filename, csv_filename)
+        print(f"The ledgerv has been updated with {errors} errors")
 
-        previous_hash = root.findall(".//hash")[-1].text
 
-        with open(csv_filename, 'r') as file:
-            csv_content = file.read()
-
-        comment = "DataCryptChain Updated"
-        datetime = datetime.now(timezone.utc).ctime() + " UTC"
-        hashable_string = f"{previous_hash} | {csv_content} | {comment} | {datetime}"
-        new_hash = hashlib.sha256(hashable_string.encode()).hexdigest()
-
-        m0 = et.Element("block")
-        root.append(m0)
-        m1 = et.SubElement(m0, "csv")
-        m1.text = csv_content
-        m2 = et.SubElement(m0, "comment")
-        m2.text = comment
-        m3 = et.SubElement(m0, "datetime")
-        m3.text = datetime
-        m4 = et.SubElement(m0, "hash")
-        m4.text = new_hash    
-
-        tree = et.ElementTree(root)
-
-        with open (filename, "wb") as files :
-            tree.write(files)
+       
 
 
     if command == INIT:
