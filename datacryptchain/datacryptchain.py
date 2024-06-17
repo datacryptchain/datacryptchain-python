@@ -11,7 +11,7 @@ import csv
 
 
 def decrypt_text(secretkeyfilename, hashed_text):
-    decode_hashed_text = hashed_text
+    decode_hashed_text = hashed_text.strip()
     decode_hashed_text_bytes = base64.b64decode(decode_hashed_text)
     with open(secretkeyfilename, 'rb') as p:
         private_key = rsa.PrivateKey.load_pkcs1(p.read())
@@ -122,7 +122,7 @@ def validate_ledger(ledger_filename, verbose=False):
     return errors
 
 
-def extract_csv(ledger_filename, csv_filename):
+def extract_csv(skf, ledger_filename, csv_filename):
     previous_tree = et.parse(ledger_filename)
     root = previous_tree.getroot()
     previous_csv = root.findall(".//csv")[-1].text
@@ -133,9 +133,9 @@ def extract_csv(ledger_filename, csv_filename):
             row_values=[]
             for value in row.split(','):
                 try:
-                    decode_text = decrypt_text(prf, value)
+                    decode_text = decrypt_text(skf, value)
                     value = decode_text
-                except:
+                except Exception as e:
                     pass
                 row_values.append(value)
             filewriter.writerow(row_values)
@@ -199,7 +199,7 @@ def unpack_chain(project, skf):
         f.write(data)
 
     errors = validate_ledger(ledger_filename)
-    errors = extract_csv(ledger_filename, csv_filename)
+    errors = extract_csv(skf, ledger_filename, csv_filename)
     errors = 0
     return errors
 
@@ -284,7 +284,8 @@ def main():
     if command == EXTRACT: #extract the csv
         ledger_filename = target + ".dcl"
         csv_filename = target + ".csv"
-        errors = extract_csv(ledger_filename, csv_filename)
+        skf = args.secretkeyfilename
+        errors = extract_csv(skf, ledger_filename, csv_filename)
         print(f"The csv has been extracted to the current directory with {errors} errors")
         
        
@@ -293,10 +294,6 @@ def main():
         csv_filename = target + ".csv"
         errors = update_ledger(ledger_filename, csv_filename)
         print(f"The ledgerv has been updated with {errors} errors")
-
-
-       
-
 
     if command == INIT:
         errors = initialize_project(target)

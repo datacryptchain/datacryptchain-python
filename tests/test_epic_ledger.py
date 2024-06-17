@@ -37,10 +37,11 @@ class TestLedgerExtractable(fakeunittest.TestCase):
     def test_ledger_is_extractable(self):
         LEDGER_FILENAME = "poodles_csv_test.dcl"
         CSV_FILENAME = "poodles_csv_test.csv"
+        SKF = None
         valid_ledger = test_ledgers.VALID_LEDGER
         with open(LEDGER_FILENAME, "w") as text_file:
             text_file.write(valid_ledger)
-        errors = dcc.extract_csv(LEDGER_FILENAME, CSV_FILENAME)
+        errors = dcc.extract_csv(SKF, LEDGER_FILENAME, CSV_FILENAME)
         self.assertEqual(errors, 0)
         self.assertTrue(os.path.exists(CSV_FILENAME))
         

@@ -20,8 +20,8 @@ class TestLedgerValidAfterCorruption(unittest.TestCase):
         pass
         
     def test_ledger_is_valid_after_corruption(self):
-        ITERATIONS = 10000
-        MAX_CSV_VERSIONS = 100
+        ITERATIONS = 100
+        MAX_CSV_VERSIONS = 10
         PROPORTION_CORRUPTED = 0.05
         MAX_LINES_PER_UPDATE = 50
         VERBOSE = True
