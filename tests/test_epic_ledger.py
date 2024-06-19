@@ -46,4 +46,48 @@ class TestLedgerExtractable(fakeunittest.TestCase):
         self.assertTrue(os.path.exists(CSV_FILENAME))
         
         
+class TestEncryptedCSVExtractable(unittest.TestCase):
+    def setUp(self):
+        pass
+    
+    def test_encrypted_csv_is_extractable(self):
+        DOWNLOAD_CSV = "triage_as_downloaded.csv"
+        LEDGER_FILENAME = "triages.dcl"
+        SKF = "secret_triages.dcs"
+        CSV_FILENAME = "triages.csv"
+    
+        # The original downloaded csv should not have identifiers
+        with open(DOWNLOAD_CSV, "r") as download_file:
+            download_csv = download_file.read()
 
+        self.assertTrue("9i-oz4E5IHU" in download_csv)
+        self.assertFalse("7541760303" in download_csv)
+        self.assertFalse("Jensen" in download_csv)        
+        
+        # Ensure the ledger does not contain any identifiers
+        with open(LEDGER_FILENAME, "r") as ledger_file:
+            ledger = ledger_file.read()
+
+        self.assertTrue("9i-oz4E5IHU" in ledger)
+        self.assertFalse("7541760303" in ledger)
+        self.assertFalse("Jensen" in ledger)
+
+        # Extract the CSV from the ledger
+        errors = dcc.extract_csv(SKF, LEDGER_FILENAME, CSV_FILENAME)
+        self.assertFalse(errors)
+
+        # Now check the csv to ensure that the decrypted identifiers now show
+        with open(CSV_FILENAME, "r") as csv_file:
+            csv = csv_file.read()
+
+        self.assertTrue("9i-oz4E5IHU" in csv)
+        self.assertTrue("7541760303" in csv)
+        self.assertTrue("Jensen" in csv)
+
+        # Clean up
+        os.remove("triages.csv")
+
+                  
+        
+
+    
